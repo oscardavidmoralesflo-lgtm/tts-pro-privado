@@ -43,8 +43,8 @@ def apply_pronunciation_rules(text: str, rules_raw: str) -> str:
                 modified_text = pattern.sub(replacement, modified_text)
     return modified_text
 
-def optimize_prosody(text: str) -> str:
-    """Mejora la puntuación y espaciado para que el modelo neuronal module con máxima naturalidad."""
+def optimize_prosody(text: str, emotion_label: str = "") -> str:
+    """Optimiza la puntuación para guiar la entonación neuronal sin alterar la identidad vocal."""
     if not text:
         return ""
     t = text.strip()
@@ -62,8 +62,8 @@ def render_account_status(request: gr.Request):
         <div class="account-user">Usuario: <b>{username}</b></div>
         <div class="account-details">
             ✨ <b>Calidad Máxima & Ilimitado:</b><br>
-            • Modulación Emocional Acústica Real<br>
-            • Pitch y Prosodia Dinámica en Vivo<br>
+            • Misma Identidad Vocal con Emociones Reales<br>
+            • Preservación del Timbre Natural HD<br>
             • Podcast 4 Voces & Emociones<br>
             • Shadowing, Audiolibros & Subtítulos<br>
             • Diccionario Fonético & Metadatos ID3
@@ -72,7 +72,7 @@ def render_account_status(request: gr.Request):
     """
 
 # =========================================================
-# 2. CATÁLOGO DE VOCES NEURONALES HD & EMOCIONES AUDIBLES
+# 2. CATÁLOGO DE VOCES NEURONALES HD
 # =========================================================
 VOICES = {
     # 🇺🇸 Inglés Neural HD (Máxima Expresividad)
@@ -101,16 +101,17 @@ SPEEDS = {
     "1.35x (Rápido / Comercial)": 35
 }
 
-# (Variación Velocidad %, Variación Tono Hz real, Variación Volumen %)
+# (Variación Velocidad %, Variación Tono Hz, Variación Volumen %)
+# El tono se mantiene en 0Hz para que la voz no se deforme ni suene como otra persona.
 EMOTIONS = {
     "✨ Natural (Equilibrado)": (0, 0, 0),
-    "😊 Alegre / Entusiasta (+25Hz Pitch)": (16, 25, 12),
-    "😔 Triste / Melancólico (-16Hz Pitch)": (-18, -16, -20),
-    "🔥 Firme / Enérgico (+18% Vol)": (10, -8, 18),
-    "🤫 Susurro / Confidencial (-45% Vol, -20Hz)": (-14, -20, -45),
-    "🎬 Épico / Tráiler (-28Hz Pitch Profundo)": (-16, -28, 22),
-    "⚡ Dinámico / YouTube (+22% Velocidad)": (22, 14, 15),
-    "🎙️ Noticiero / Autoridad (-6Hz)": (6, -6, 8)
+    "😊 Alegre / Entusiasta (Ágil y Brillante)": (12, 0, 10),
+    "😔 Triste / Melancólico (Lento y Suave)": (-15, 0, -12),
+    "🔥 Firme / Enérgico (Autoridad y Presencia)": (6, 0, 15),
+    "🤫 Susurro / Confidencial (Íntimo y Cercano)": (-10, 0, -35),
+    "🎬 Épico / Tráiler (Cinematográfico)": (-12, 0, 18),
+    "⚡ Dinámico / YouTube (Enérgico y Rápido)": (18, 0, 8),
+    "🎙️ Noticiero / Radio (Formal y Nítido)": (5, 0, 6)
 }
 
 def resolve_voice_id(label_or_id: str, default: str = "en-US-AndrewNeural") -> str:
@@ -135,10 +136,10 @@ def resolve_voice_id(label_or_id: str, default: str = "en-US-AndrewNeural") -> s
     return default
 
 # =========================================================
-# MOTOR DE SÍNTESIS CORE HD CON MODULACIÓN EXACTA
+# MOTOR DE SÍNTESIS CORE HD (PRESERVA LA IDENTIDAD VOCAL)
 # =========================================================
 async def core_synthesize(text, voice_id, rate_val=0, pitch_val=0, volume_val=0):
-    """Sintetiza audio con validación estricta de parámetros para edge-tts."""
+    """Sintetiza audio preservando el timbre natural del actor."""
     if not text or not text.strip():
         return b""
     
@@ -184,14 +185,14 @@ def parse_tagged_speech(text: str):
     segments = []
     current_emotion = "✨ Natural (Equilibrado)"
     emotion_map = {
-        "[susurro]": "🤫 Susurro / Confidencial (-45% Vol, -20Hz)",
-        "[alegre]": "😊 Alegre / Entusiasta (+25Hz Pitch)",
-        "[triste]": "😔 Triste / Melancólico (-16Hz Pitch)",
-        "[épico]": "🎬 Épico / Tráiler (-28Hz Pitch Profundo)",
-        "[epico]": "🎬 Épico / Tráiler (-28Hz Pitch Profundo)",
-        "[firme]": "🔥 Firme / Enérgico (+18% Vol)",
-        "[dinámico]": "⚡ Dinámico / YouTube (+22% Velocidad)",
-        "[dinamico]": "⚡ Dinámico / YouTube (+22% Velocidad)",
+        "[susurro]": "🤫 Susurro / Confidencial (Íntimo y Cercano)",
+        "[alegre]": "😊 Alegre / Entusiasta (Ágil y Brillante)",
+        "[triste]": "😔 Triste / Melancólico (Lento y Suave)",
+        "[épico]": "🎬 Épico / Tráiler (Cinematográfico)",
+        "[epico]": "🎬 Épico / Tráiler (Cinematográfico)",
+        "[firme]": "🔥 Firme / Enérgico (Autoridad y Presencia)",
+        "[dinámico]": "⚡ Dinámico / YouTube (Enérgico y Rápido)",
+        "[dinamico]": "⚡ Dinámico / YouTube (Enérgico y Rápido)",
         "[normal]": "✨ Natural (Equilibrado)"
     }
     for token in tokens:
@@ -918,7 +919,7 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
                 gr.Markdown("### 📝 Editor Inteligente con Expresiones y Pausas")
                 with gr.Row(elem_classes=["top-bar-controls"]):
                     main_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida y Natural)", show_label=False, scale=3)
-                    main_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="✨ Natural (Equilibrado)", label="🎭 Modulación Dinámica", scale=2)
+                    main_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="✨ Natural (Equilibrado)", label="🎭 Actuación Emocional", scale=2)
                     main_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Natural / Conversacional Óptimo)", show_label=False, scale=2)
                     main_play_btn = gr.Button("▶", elem_classes=["btn-play-hero"])
                 
@@ -1100,7 +1101,7 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             # 12. Preferencias & Calidad
             with gr.Column(visible=False, elem_classes=["card-box"]) as view_settings:
                 gr.Markdown("### ⚙️ Preferencias y Modulación de Voz")
-                set_pitch = gr.Slider(minimum=-30, maximum=30, value=0, step=2, label="Micro-Ajuste Global de Tono (Hz)")
+                set_pitch = gr.Slider(minimum=-20, maximum=20, value=0, step=1, label="Micro-Ajuste Global de Tono (Hz)")
                 set_volume = gr.Slider(minimum=-50, maximum=50, value=0, step=2, label="Ganancia Global de Volumen (%)")
                 btn_save_settings = gr.Button("💾 Guardar Preferencias", variant="primary")
                 set_status = gr.Markdown("")
