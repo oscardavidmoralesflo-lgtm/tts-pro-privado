@@ -101,14 +101,14 @@ SPEEDS = {
     "1.35x (Rápido / Comercial)": 35
 }
 
-# Modulación Orgánica: Ajustes sutiles de ritmo y volumen que conservan el contorno melódico
+# (Variación Velocidad %, Variación Tono Hz, Variación Volumen %)
 EMOTIONS = {
     "✨ Natural / Neutro Óptimo": (0, 0, 0),
-    "😊 Alegre / Entusiasta": (8, 2, 4),
-    "😔 Triste / Reflexivo": (-10, -3, -6),
+    "😊 Alegre / Entusiasta": (8, 0, 4),
+    "😔 Triste / Reflexivo": (-10, 0, -6),
     "🔥 Firme / Enérgico": (10, 0, 8),
-    "🤫 Susurro / Confidencial": (-8, -4, -14),
-    "🎬 Épico / Tráiler": (-6, -3, 6),
+    "🤫 Susurro / Confidencial": (-8, 0, -14),
+    "🎬 Épico / Tráiler": (-6, 0, 6),
     "🎙️ Noticiero / Autoridad": (5, 0, 2)
 }
 
@@ -134,10 +134,10 @@ def resolve_voice_id(label_or_id: str, default: str = "en-US-AndrewNeural") -> s
     return default
 
 # =========================================================
-# MOTOR DE SÍNTESIS CORE HD (PROSODIA PRESERVADA)
+# MOTOR DE SÍNTESIS CORE HD (CORREGIDO)
 # =========================================================
 async def core_synthesize(text, voice_id, rate_val=0, pitch_val=0, volume_val=0):
-    """Sintetiza audio preservando la inflexión y micro-modulación neuronal nativa."""
+    """Sintetiza audio con validación estricta de parámetros para edge-tts."""
     if not text or not text.strip():
         return b""
     
@@ -146,11 +146,11 @@ async def core_synthesize(text, voice_id, rate_val=0, pitch_val=0, volume_val=0)
     
     kwargs = {}
     if rate_val != 0:
-        kwargs["rate"] = f"{'+' if rate_val > 0 else ''}{rate_val}%"
+        kwargs["rate"] = f"{'+' if rate_val > 0 else ''}{int(rate_val)}%"
     if pitch_val != 0:
-        kwargs["pitch"] = f"{'+' if pitch_val > 0 else ''}{pitch_val}%"
+        kwargs["pitch"] = f"{'+' if pitch_val > 0 else ''}{int(pitch_val)}Hz"
     if volume_val != 0:
-        kwargs["volume"] = f"{'+' if volume_val > 0 else ''}{volume_val}%"
+        kwargs["volume"] = f"{'+' if volume_val > 0 else ''}{int(volume_val)}%"
     
     communicator = edge_tts.Communicate(
         text=clean_text,
@@ -1096,7 +1096,7 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             # 12. Preferencias & Calidad
             with gr.Column(visible=False, elem_classes=["card-box"]) as view_settings:
                 gr.Markdown("### ⚙️ Preferencias y Modulación de Voz")
-                set_pitch = gr.Slider(minimum=-30, maximum=30, value=0, step=1, label="Micro-Ajuste Global de Tono (%)")
+                set_pitch = gr.Slider(minimum=-20, maximum=20, value=0, step=1, label="Micro-Ajuste Global de Tono (Hz)")
                 set_volume = gr.Slider(minimum=-50, maximum=50, value=0, step=2, label="Ganancia Global de Volumen (%)")
                 btn_save_settings = gr.Button("💾 Guardar Preferencias", variant="primary")
                 set_status = gr.Markdown("")
