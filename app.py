@@ -43,62 +43,73 @@ def apply_pronunciation_rules(text: str, rules_raw: str) -> str:
                 modified_text = pattern.sub(replacement, modified_text)
     return modified_text
 
+def optimize_prosody(text: str) -> str:
+    """Mejora la puntuación y espaciado para que el modelo neuronal module con máxima naturalidad."""
+    if not text:
+        return ""
+    t = text.strip()
+    t = re.sub(r'[ \t]+', ' ', t)
+    t = re.sub(r'([,.;:?!])(?=[^\s0-9])', r'\1 ', t)
+    t = re.sub(r'\.{3,}', '...', t)
+    return t
+
 def render_account_status(request: gr.Request):
     """Muestra la tarjeta de Suite PRO Ilimitada en la barra lateral."""
     username = getattr(request, "username", "admin_pro")
     return f"""
     <div class="account-card pro-card">
-        <div class="account-badge pro-tag">👑 SUITE PRO MASTER</div>
+        <div class="account-badge pro-tag">👑 SUITE PRO MASTER HD</div>
         <div class="account-user">Usuario: <b>{username}</b></div>
         <div class="account-details">
-            ✨ <b>Acceso Total e Ilimitado:</b><br>
-            • Sin límites de caracteres ni tiempo<br>
+            ✨ <b>Calidad Máxima & Ilimitado:</b><br>
+            • Audio HD 24kHz / Prosodia Humana<br>
+            • Modulación Dinámica Orgánica<br>
             • Podcast 4 Voces & Emociones<br>
-            • Shadowing & Audiolibros ZIP<br>
-            • Subtítulos .SRT/.VTT & ID3 Portadas<br>
-            • Diccionario Fonético & Asistente IA
+            • Shadowing, Audiolibros & Subtítulos<br>
+            • Diccionario Fonético & Metadatos ID3
         </div>
     </div>
     """
 
 # =========================================================
-# 2. CATÁLOGO DE VOCES NEURONALES HD & EMOCIONES
+# 2. CATÁLOGO DE VOCES NEURONALES HD & EMOCIONES ORGÁNICAS
 # =========================================================
 VOICES = {
-    # 🇺🇸 Inglés Neural HD
-    "🇺🇸 Andrew (Podcast / Cálida)": "en-US-AndrewNeural",
+    # 🇺🇸 Inglés Neural HD (Máxima Expresividad)
+    "🇺🇸 Andrew (Podcast / Cálida y Natural)": "en-US-AndrewNeural",
     "🇺🇸 Jenny (Conversacional / Expresiva)": "en-US-JennyNeural",
-    "🇺🇸 Ava (Joven / Dinámica)": "en-US-AvaNeural",
+    "🇺🇸 Ava (Joven / Dinámica y Fresca)": "en-US-AvaNeural",
     "🇺🇸 Brian (Documental / Autoridad)": "en-US-BrianNeural",
-    "🇺🇸 Emma (Audiolibros / Suave)": "en-US-EmmaNeural",
-    "🇺🇸 Guy (Casual / YouTube)": "en-US-GuyNeural",
-    "🇺🇸 Aria (Locución de Estudio)": "en-US-AriaNeural",
-    "🇺🇸 Christopher (Profundo / Relato)": "en-US-ChristopherNeural",
+    "🇺🇸 Emma (Audiolibros / Suave y Envolvente)": "en-US-EmmaNeural",
+    "🇺🇸 Guy (Casual / YouTube y Dinámico)": "en-US-GuyNeural",
+    "🇺🇸 Aria (Locución de Estudio / Cristalina)": "en-US-AriaNeural",
+    "🇺🇸 Christopher (Profundo / Relato Cinematográfico)": "en-US-ChristopherNeural",
     
-    # 🇲🇽 🇪🇸 🇨🇴 Español Neural HD
-    "🇲🇽 Dalia (México / Expresiva)": "es-MX-DaliaNeural",
-    "🇲🇽 Jorge (México / Radio y Noticias)": "es-MX-JorgeNeural",
-    "🇪🇸 Álvaro (España / Corporativo)": "es-ES-AlvaroNeural",
-    "🇪🇸 Elvira (España / Narrativa)": "es-ES-ElviraNeural",
-    "🇨🇴 Gonzalo (Colombia / Neutro Claro)": "es-CO-GonzaloNeural",
-    "🇨🇴 Salomé (Colombia / Amigable)": "es-CO-SalomeNeural"
+    # 🇲🇽 🇪🇸 🇨🇴 Español Neural HD (Acentos Vivos y Claros)
+    "🇲🇽 Dalia (México / Expresiva y Cálida)": "es-MX-DaliaNeural",
+    "🇲🇽 Jorge (México / Radio, Noticias y Firme)": "es-MX-JorgeNeural",
+    "🇪🇸 Álvaro (España / Corporativo y Elegante)": "es-ES-AlvaroNeural",
+    "🇪🇸 Elvira (España / Narrativa y Literaria)": "es-ES-ElviraNeural",
+    "🇨🇴 Gonzalo (Colombia / Neutro Claro y Preciso)": "es-CO-GonzaloNeural",
+    "🇨🇴 Salomé (Colombia / Amigable y Espontánea)": "es-CO-SalomeNeural"
 }
 
 SPEEDS = {
-    "0.8x (Lento / Aprendizaje)": -20,
-    "1.0x (Normal / Conversacional)": 0,
-    "1.2x (Rápido / Dinámico)": 20,
-    "1.5x (Ultra Dinámico)": 50
+    "0.85x (Lento / Didáctico)": -15,
+    "1.0x (Natural / Conversacional Óptimo)": 0,
+    "1.15x (Dinámico / Enérgico)": 15,
+    "1.35x (Rápido / Comercial)": 35
 }
 
+# Modulación Orgánica: Ajustes sutiles de ritmo y volumen que conservan el contorno melódico
 EMOTIONS = {
-    "😐 Neutral (Estándar)": (0, 0, 0),
-    "😊 Alegre / Entusiasta": (10, 10, 0),
-    "😔 Triste / Melancólico": (-10, -15, -10),
-    "😡 Enojado / Firme": (15, -10, 10),
-    "🤫 Susurro / Confidencial": (-10, -25, -30),
-    "🎤 Épico / Tráiler": (-5, -20, 10),
-    "🎙️ Noticiero / Formal": (5, -5, 0)
+    "✨ Natural / Neutro Óptimo": (0, 0, 0),
+    "😊 Alegre / Entusiasta": (8, 2, 4),
+    "😔 Triste / Reflexivo": (-10, -3, -6),
+    "🔥 Firme / Enérgico": (10, 0, 8),
+    "🤫 Susurro / Confidencial": (-8, -4, -14),
+    "🎬 Épico / Tráiler": (-6, -3, 6),
+    "🎙️ Noticiero / Autoridad": (5, 0, 2)
 }
 
 def resolve_voice_id(label_or_id: str, default: str = "en-US-AndrewNeural") -> str:
@@ -123,22 +134,35 @@ def resolve_voice_id(label_or_id: str, default: str = "en-US-AndrewNeural") -> s
     return default
 
 # =========================================================
-# MOTOR DE SÍNTESIS CORE
+# MOTOR DE SÍNTESIS CORE HD (PROSODIA PRESERVADA)
 # =========================================================
 async def core_synthesize(text, voice_id, rate_val=0, pitch_val=0, volume_val=0):
+    """Sintetiza audio preservando la inflexión y micro-modulación neuronal nativa."""
     if not text or not text.strip():
         return b""
-    kwargs = {}
-    if rate_val != 0: kwargs["rate"] = f"{'+' if rate_val > 0 else ''}{rate_val}%"
-    if pitch_val != 0: kwargs["pitch"] = f"{'+' if pitch_val > 0 else ''}{pitch_val}Hz"
-    if volume_val != 0: kwargs["volume"] = f"{'+' if volume_val > 0 else ''}{volume_val}%"
     
+    clean_text = optimize_prosody(text)
     clean_voice = resolve_voice_id(voice_id)
-    communicator = edge_tts.Communicate(text=text.strip(), voice=clean_voice, **kwargs)
+    
+    kwargs = {}
+    if rate_val != 0:
+        kwargs["rate"] = f"{'+' if rate_val > 0 else ''}{rate_val}%"
+    if pitch_val != 0:
+        kwargs["pitch"] = f"{'+' if pitch_val > 0 else ''}{pitch_val}%"
+    if volume_val != 0:
+        kwargs["volume"] = f"{'+' if volume_val > 0 else ''}{volume_val}%"
+    
+    communicator = edge_tts.Communicate(
+        text=clean_text,
+        voice=clean_voice,
+        **kwargs
+    )
+    
     buffer = io.BytesIO()
     async for chunk in communicator.stream():
         if chunk["type"] == "audio":
             buffer.write(chunk["data"])
+            
     return buffer.getvalue()
 
 def generate_mp3_silence(seconds: float) -> bytes:
@@ -157,15 +181,15 @@ def parse_tagged_speech(text: str):
     tag_pattern = r'(\[(?:Pausa\s+\d+(?:\.\d+)?s|Susurro|Alegre|Triste|Épico|Epico|Firme|Normal)\])'
     tokens = re.split(tag_pattern, text, flags=re.IGNORECASE)
     segments = []
-    current_emotion = "😐 Neutral (Estándar)"
+    current_emotion = "✨ Natural / Neutro Óptimo"
     emotion_map = {
         "[susurro]": "🤫 Susurro / Confidencial",
         "[alegre]": "😊 Alegre / Entusiasta",
-        "[triste]": "😔 Triste / Melancólico",
-        "[épico]": "🎤 Épico / Tráiler",
-        "[epico]": "🎤 Épico / Tráiler",
-        "[firme]": "😡 Enojado / Firme",
-        "[normal]": "😐 Neutral (Estándar)"
+        "[triste]": "😔 Triste / Reflexivo",
+        "[épico]": "🎬 Épico / Tráiler",
+        "[epico]": "🎬 Épico / Tráiler",
+        "[firme]": "🔥 Firme / Enérgico",
+        "[normal]": "✨ Natural / Neutro Óptimo"
     }
     for token in tokens:
         if not token: continue
@@ -217,12 +241,11 @@ def embed_id3_metadata(mp3_bytes: bytes, title: str = "", artist: str = "", albu
 # FUNCIONES DE CADA MÓDULO
 # =========================================================
 
-# 1. Editor Inteligente (Tags & Pausas)
+# 1. Editor Inteligente
 async def fn_main_editor(text, voice_label, default_emotion, speed_label, pitch_pref, vol_pref, rules_raw, history):
     if not text or not text.strip():
         return None, history, "⚠️ Escribe algún texto en el editor."
     
-    # Aplicar diccionario fonético
     processed_text = apply_pronunciation_rules(text, rules_raw)
     voice_id = resolve_voice_id(voice_label, "en-US-AndrewNeural")
     base_speed = SPEEDS.get(speed_label, 0)
@@ -238,7 +261,7 @@ async def fn_main_editor(text, voice_label, default_emotion, speed_label, pitch_
             if seg["type"] == "pause":
                 final_audio.write(generate_mp3_silence(seg["duration"]))
             else:
-                emotion_to_use = seg["emotion"] if seg["emotion"] != "😐 Neutral (Estándar)" else default_emotion
+                emotion_to_use = seg["emotion"] if seg["emotion"] != "✨ Natural / Neutro Óptimo" else default_emotion
                 e_rate, e_pitch, e_vol = EMOTIONS.get(emotion_to_use, (0, 0, 0))
                 
                 final_rate = base_speed + e_rate
@@ -262,7 +285,7 @@ async def fn_main_editor(text, voice_label, default_emotion, speed_label, pitch_
         history = history or []
         history.insert(0, [title, voice_label, filename, time.strftime("%H:%M:%S")])
         
-        return filename, history, f"✅ Audio generado con éxito ({count_words(text):,} palabras / {len(text):,} caracteres)."
+        return filename, history, f"✅ Audio HD generado con éxito ({count_words(text):,} palabras / {len(text):,} caracteres)."
     except Exception as e:
         return None, history, f"❌ Error: {str(e)}"
 
@@ -273,9 +296,9 @@ async def fn_test_voice_sample(voice_label):
     voice_id = resolve_voice_id(voice_label, "en-US-JennyNeural")
     
     if any(k in voice_id.lower() for k in ["es-", "dalia", "jorge", "alvaro", "elvira", "gonzalo", "salome"]):
-        sample_text = "Hola, esta es una prueba de entonación y claridad natural con tecnología neuronal HD."
+        sample_text = "Hola, esta es una muestra de entonación natural, calidez y modulación viva con síntesis neuronal HD."
     else:
-        sample_text = "Hello! This is a sample demonstrating the natural inflection and clarity of this neural voice."
+        sample_text = "Hello! This is a high-fidelity demonstration of natural cadence, expressive inflection, and lifelike neural speech."
     
     try:
         audio_bytes = await core_synthesize(sample_text, voice_id)
@@ -284,7 +307,7 @@ async def fn_test_voice_sample(voice_label):
         filename = f"sample_voice_{int(time.time())}.mp3"
         with open(filename, "wb") as f:
             f.write(audio_bytes)
-        return filename, f"✅ Muestra de **{voice_label}** generada con éxito."
+        return filename, f"✅ Muestra HD de **{voice_label}** generada con éxito."
     except Exception as e:
         return None, f"❌ Error al generar la muestra: {str(e)}"
 
@@ -344,7 +367,7 @@ async def fn_podcast_studio(script, num_voices, v1_lbl, v2_lbl, v3_lbl, v4_lbl, 
         with open(filename, "wb") as f:
             f.write(audio_data)
             
-        return filename, f"✅ Podcast compilado con éxito ({processed_count} intervenciones / {count_words(script):,} palabras)."
+        return filename, f"✅ Podcast HD compilado con éxito ({processed_count} intervenciones / {count_words(script):,} palabras)."
     except Exception as e:
         return None, f"❌ Error durante la compilación: {str(e)}"
 
@@ -500,7 +523,7 @@ async def fn_video_voiceover(text, voice_label, style_speed, rules_raw):
 
 # 7. Asistente de Guiones con IA
 def fn_generate_script_assistant(template_type, topic):
-    t = topic.strip() if topic and topic.strip() else "el poder de la consistencia"
+    t = topic.strip() if topic and topic.strip() else "el ritmo al hablar inglés"
     
     if "TikTok" in template_type:
         return f"""[Alegre] ¿Sabías que el 90% de las personas comete este error al hablar sobre {t}?
@@ -533,7 +556,7 @@ El viaje hacia {t} comenzó en una mañana despejada de otoño. Las decisiones q
 [Pausa 1.0s]
 Con cada obstáculo superado, la visión se hacía más clara. No había marcha atrás."""
     
-    else: # Comercial
+    else:
         return f"""[Épico] ¿Buscas llevar tus resultados al siguiente nivel con {t}?
 [Pausa 0.8s]
 [Alegre] Descubre la plataforma diseñada para creadores y profesionales exigentes.
@@ -566,7 +589,7 @@ def fn_embed_metadata(source_audio, title, artist, album, cover_image):
     except Exception as e:
         return None, f"❌ Error al incrustar metadatos: {str(e)}"
 
-# 9. Centro de Descargas & Exportación Masiva en ZIP
+# 9. Centro de Descargas
 def get_all_media_files():
     files = [f for f in os.listdir(".") if f.endswith(".mp3") or f.endswith(".srt") or f.endswith(".vtt") or f.endswith(".zip")]
     files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
@@ -891,16 +914,16 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             with gr.Column(visible=True, elem_classes=["card-box"]) as view_editor:
                 gr.Markdown("### 📝 Editor Inteligente con Expresiones y Pausas")
                 with gr.Row(elem_classes=["top-bar-controls"]):
-                    main_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida)", show_label=False, scale=3)
-                    main_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="😐 Neutral (Estándar)", label="🎭 Emoción Base", scale=2)
-                    main_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Normal / Conversacional)", show_label=False, scale=2)
+                    main_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida y Natural)", show_label=False, scale=3)
+                    main_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="✨ Natural / Neutro Óptimo", label="🎭 Modulación Dinámica", scale=2)
+                    main_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Natural / Conversacional Óptimo)", show_label=False, scale=2)
                     main_play_btn = gr.Button("▶", elem_classes=["btn-play-hero"])
                 
                 main_audio = gr.Audio(show_label=False, elem_classes=["custom-audio-player"])
                 main_status = gr.Markdown("")
                 
                 # Barra de Botones Táctiles para Pausas y Emociones
-                gr.Markdown("##### ⏱️ Insertar Pausas y Actitudes en el Cursor:")
+                gr.Markdown("##### ⏱️ Insertar Pausas y Actitudes en el Texto:")
                 with gr.Row():
                     btn_tag_p05 = gr.Button("⏱️ +Pausa 0.5s", elem_classes=["tag-btn"])
                     btn_tag_p10 = gr.Button("⏱️ +Pausa 1.0s", elem_classes=["tag-btn"])
@@ -908,11 +931,11 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
                     btn_tag_alegre = gr.Button("😊 [Alegre]", elem_classes=["tag-btn"])
                     btn_tag_susurro = gr.Button("🤫 [Susurro]", elem_classes=["tag-btn"])
                     btn_tag_triste = gr.Button("😔 [Triste]", elem_classes=["tag-btn"])
-                    btn_tag_epico = gr.Button("🎤 [Épico]", elem_classes=["tag-btn"])
-                    btn_tag_normal = gr.Button("😐 [Normal]", elem_classes=["tag-btn"])
+                    btn_tag_epico = gr.Button("🎬 [Épico]", elem_classes=["tag-btn"])
+                    btn_tag_normal = gr.Button("✨ [Normal]", elem_classes=["tag-btn"])
                 
                 main_text = gr.Textbox(
-                    placeholder="Escribe tu guión. Puedes usar tags como [Pausa 1s] o [Susurro]...",
+                    placeholder="Escribe tu guión. Puedes usar pausas como [Pausa 1.0s] o modulaciones como [Alegre] o [Susurro]...",
                     show_label=False,
                     lines=8,
                     value="Welcome to Text to Speech Pro Studio. [Pausa 1.0s] [Alegre] Convert your scripts into ultra-realistic speech using neural deep learning models! [Pausa 0.8s] [Susurro] Experience true human inflection like never before.",
@@ -930,14 +953,14 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
                 pod_num_voices = gr.Radio(choices=["2 Voces (Conversación)", "3 Voces (Panel)", "4 Voces (Debate Completo)"], value="2 Voces (Conversación)", label="Cantidad de Participantes")
                 
                 with gr.Row():
-                    pod_v1 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida)", label="Locutor 1 (Host)")
+                    pod_v1 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida y Natural)", label="Locutor 1 (Host)")
                     pod_v2 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Jenny (Conversacional / Expresiva)", label="Locutor 2 (Invitado 1)")
                 with gr.Row() as pod_extra_row:
                     pod_v3 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Brian (Documental / Autoridad)", label="Locutor 3 (Especialista)", visible=False)
-                    pod_v4 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Ava (Joven / Dinámica)", label="Locutor 4 (Narrador)", visible=False)
+                    pod_v4 = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Ava (Joven / Dinámica y Fresca)", label="Locutor 4 (Narrador)", visible=False)
                 with gr.Row():
-                    pod_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="😐 Neutral (Estándar)", label="🎭 Actitud Global")
-                    pod_spd = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Normal / Conversacional)", label="Velocidad")
+                    pod_emotion = gr.Dropdown(choices=list(EMOTIONS.keys()), value="✨ Natural / Neutro Óptimo", label="🎭 Modulación Global")
+                    pod_spd = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Natural / Conversacional Óptimo)", label="Velocidad")
                 
                 pod_text = gr.Textbox(
                     label="Guión de Podcast (Usa 'Locutor 1:', 'Locutor 2:', 'Locutor 3:' o 'Locutor 4:')",
@@ -958,8 +981,8 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
                 gr.Markdown("### 🗣️ Shadowing & Fonética Trainer")
                 gr.Markdown("Crea sesiones de práctica con pausas inteligentes para repetición guiada y exporta las pistas en ZIP.")
                 with gr.Row():
-                    shad_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida)", label="Voz de Entrenamiento", scale=2)
-                    shad_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="0.8x (Lento / Aprendizaje)", label="Velocidad de Dicción", scale=1)
+                    shad_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Andrew (Podcast / Cálida y Natural)", label="Voz de Entrenamiento", scale=2)
+                    shad_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="0.85x (Lento / Didáctico)", label="Velocidad de Dicción", scale=1)
                     shad_mode = gr.Dropdown(choices=["Repetición Simple (Frase + Silencio)", "Doble Escucha (Frase + Silencio + Repetición)"], value="Repetición Simple (Frase + Silencio)", label="Modo de Práctica", scale=1)
                 
                 shad_text = gr.Textbox(
@@ -977,8 +1000,8 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             with gr.Column(visible=False, elem_classes=["card-box"]) as view_book:
                 gr.Markdown("### 📖 Generador de Audiolibros por Capítulos en ZIP")
                 with gr.Row():
-                    book_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇪🇸 Elvira (España / Narrativa)", label="Voz de Narrador")
-                    book_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Normal / Conversacional)", label="Velocidad")
+                    book_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇪🇸 Elvira (España / Narrativa y Literaria)", label="Voz de Narrador")
+                    book_speed = gr.Dropdown(choices=list(SPEEDS.keys()), value="1.0x (Natural / Conversacional Óptimo)", label="Velocidad")
                 
                 book_text = gr.Textbox(
                     label="Contenido del Libro (Usa '### Capítulo 1', 'Capítulo 2' para separar automáticamente)",
@@ -995,7 +1018,7 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             with gr.Column(visible=False, elem_classes=["card-box"]) as view_video:
                 gr.Markdown("### 🎬 Locución para Video & Creadores")
                 with gr.Row():
-                    vid_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Guy (Casual / YouTube)", label="Voz de Locución")
+                    vid_voice = gr.Dropdown(choices=list(VOICES.keys()), value="🇺🇸 Guy (Casual / YouTube y Dinámico)", label="Voz de Locución")
                     vid_style = gr.Dropdown(choices=["⚡ Dinámico / YouTube (+15%)", "🗣️ Comercial / Estándar (0%)", "🎬 Documental / Pausado (-10%)"], value="⚡ Dinámico / YouTube (+15%)", label="Estilo de Locución")
                 
                 vid_text = gr.Textbox(label="Guión del Video", lines=5, value="In this video, I will show you how to generate realistic neural voiceovers in seconds. Make sure to hit that subscribe button!")
@@ -1073,8 +1096,8 @@ with gr.Blocks(title="Text to Speech Pro Studio", css=custom_css) as demo:
             # 12. Preferencias & Calidad
             with gr.Column(visible=False, elem_classes=["card-box"]) as view_settings:
                 gr.Markdown("### ⚙️ Preferencias y Modulación de Voz")
-                set_pitch = gr.Slider(minimum=-30, maximum=30, value=0, step=2, label="Modulación Global de Tono (Hz)")
-                set_volume = gr.Slider(minimum=-50, maximum=50, value=0, step=5, label="Ganancia Global de Volumen (%)")
+                set_pitch = gr.Slider(minimum=-30, maximum=30, value=0, step=1, label="Micro-Ajuste Global de Tono (%)")
+                set_volume = gr.Slider(minimum=-50, maximum=50, value=0, step=2, label="Ganancia Global de Volumen (%)")
                 btn_save_settings = gr.Button("💾 Guardar Preferencias", variant="primary")
                 set_status = gr.Markdown("")
 
