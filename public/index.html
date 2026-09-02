@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonicReader Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { gray: { 850: '#1f2937', 900: '#111827', 950: '#030712' } } } } }
+    </script>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans min-h-screen flex justify-center py-10">
+
+    <main class="w-full max-w-4xl px-6">
+        <!-- Header -->
+        <header class="flex items-center gap-3 mb-10">
+            <div class="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">S</div>
+            <h1 class="text-2xl font-bold tracking-tight text-white">SonicReader <span class="text-indigo-400">Pro</span></h1>
+        </header>
+
+        <!-- Controles -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex gap-4 mb-6 shadow-xl">
+            <select id="voice" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-1/3 p-2.5 outline-none">
+                <option value="af_heart">🎙️ Heart (US Narrative)</option>
+                <option value="am_adam">👨 Adam (US Deep)</option>
+                <option value="bf_emma">👑 Emma (UK Formal)</option>
+            </select>
+            <button id="playBtn" onclick="startStreaming()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-md flex items-center gap-2 ml-auto">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 22v-20l18 10-18 10z"/></svg> Stream Audio
+            </button>
+        </div>
+
+        <!-- Editor -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl">
+            <textarea id="text" class="w-full h-64 bg-transparent text-gray-200 text-lg leading-relaxed focus:outline-none resize-none" placeholder="Type your script here..."></textarea>
+            <div class="text-xs text-gray-500 mt-2" id="status">Status: Ready</div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('text').value = "Welcome to true real-time streaming. This audio begins playing the exact millisecond the first sentence is processed by the neural engine, eliminating wait times completely.";
+
+        async function startStreaming() {
+            const text = document.getElementById('text').value.trim();
+            if (!text) return;
+
+            const btn = document.getElementById('playBtn');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Compiling...`;
+            status.innerText = "Status: Streaming connection open...";
+
+            try {
+                const response = await fetch('/api/tts/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, voice: document.getElementById('voice').value, speed: 1.0 })
+                });
+
+                const reader = response.body.getReader();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                let nextStartTime = audioCtx.currentTime + 0.1; 
+                let buffer = new Uint8Array();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (value) {
+                        let newBuffer = new Uint8Array(buffer.length + value.length);
+                        newBuffer.set(buffer);
+                        newBuffer.set(value, buffer.length);
+                        buffer = newBuffer;
+                    }
+
+                    // Decodificar el protocolo binario personalizado enviado por FastAPI
+                    while (buffer.length >= 4) {
+                        const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+                        const chunkLength = dataView.getUint32(0, true); 
+
+                        if (buffer.length >= 4 + chunkLength) {
+                            const audioData = buffer.slice(4, 4 + chunkLength);
+                            buffer = buffer.slice(4 + chunkLength);
+
+                            // Convertir bytes crudos PCM a AudioBuffer flotante y reproducir
+                            const float32Data = new Float32Array(audioData.buffer, audioData.byteOffset, audioData.byteLength / 4);
+                            const audioBuffer = audioCtx.createBuffer(1, float32Data.length, 24000);
+                            audioBuffer.copyToChannel(float32Data, 0);
+
+                            const source = audioCtx.createBufferSource();
+                            source.buffer = audioBuffer;
+                            source.connect(audioCtx.destination);
+                            
+                            source.start(nextStartTime);
+                            nextStartTime += audioBuffer.duration;
+                        } else {
+                            break; 
+                        }
+                    }
+                    if (done) break;
+                }
+                status.innerText = "Status: Streaming complete.";
+            } catch (err) {
+                status.innerText = "Error: " + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 22v-20l18 10-18 10z"/></svg> Stream Audio`;
+            }
+        }
+    </script>
+</body>
+</html>
